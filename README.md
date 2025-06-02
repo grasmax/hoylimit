@@ -1,6 +1,7 @@
 # hoylimit - django python project to set limit for hoymiles inverters in a web browser
-Das Setzen von Limits für die Inverter der HMS-Serie von Hoymiles über die Oberfläche der OpenDTU ist einigermaßen umständlich.
+Das Setzen von Limits für die Inverter der HMS-Serie von Hoymiles über die Oberfläche der [OpenDTU-Funkeinheit](https://selbstbau-pv.de/products/opendtu-hybrid) ist einigermaßen umständlich.
 Das Einstellen des Limits wird durch die hier beschriebene Anwendung stark vereinfacht.
+Diese Anwendung nutzt [OpenDTU](https://github.com/tbnobody/OpenDTU) für das Einstellen des Limits. Die Dokumentation zum API steht [hier](https://www.opendtu.solar/firmware/web_api).
 Die Anwendung setzt ein funktionierendes Django-Projekt (hier 'd1/soda') mit einem Apache-Server und eine OpenDTU-Funkeinheit mit Verbindung zu den Invertern voraus.
 
 Erweiterung eines Django-Projekts:
@@ -30,4 +31,4 @@ Aufruf: http://nnn.nnnn.nnn.nnn/<Name des Django-Projekts>/inverterlimits
 
 ![image](https://github.com/user-attachments/assets/c4eded52-7fec-43fb-9ab3-13426b9edbf5)
 
-Fehler werden protokolliert ins Apache-Fehlerprotokoll: \\nnn.nnn.nnn.nnn\SambaVar\log\apache2\error.log
+Fehler werden protokolliert ins Apache-Fehlerprotokoll: \\\\nnn.nnn.nnn.nnn\SambaVar\log\apache2\error.log.
