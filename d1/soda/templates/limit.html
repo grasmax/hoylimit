@@ -1,0 +1,237 @@
+<html>
+<head>
+    <title>Inverter-Limits setzen</title>
+	{% load static %}
+    <link rel="icon" href="{% static 'soda/favicon.png' %}" type="image/png">
+
+    <style>
+        #title_bk {
+            background-color: #5690bb;
+        }
+        #title {
+            color: white;
+            margin-left: 25px;
+            text-align: left;
+            font-size: 20pt;
+            font-family: Calibri;
+        }
+
+        td {
+            color: blue;
+            font-size: 12pt;
+            font-family: Calibri;
+        }
+
+        #btnLimit {
+            color: blue;
+            font-size: 11pt;
+            font-family: Calibri;
+            background-color: rgb(233,233,233);
+            border-radius: 4px;
+        }
+
+        #btnCopy {
+            padding: 0;
+            border: none;
+            background: none;
+        }
+        #btnDelete {
+            padding: 0;
+            border: none;
+            background: none;
+        }
+
+        #RvWert {
+            background-color: black;
+            color: rgb(85,255,85);
+            width: 300px;
+            height: 600px;
+            word-wrap: break-word;
+        }
+        
+    </style>
+
+    <script type="text/javascript">
+
+        function sGetPara(InputId) {
+            //return '"' + document.getElementById(InputId).value + '"';
+            return document.getElementById(InputId).value;
+        }
+
+        function Scroll() {
+            rvWert = document.getElementById('RvWert');
+
+            //funktioniert, habe aber keine Schleife hinbekommen:
+            //Scroll wird nur einmal aufgerufen und kommt nicht am clearInterval() vorbei
+            //rvWert.scrollTop += 100;
+            //rvWert.scrollBy(0,300);
+
+            if (rvWert.scrollTop == rvWert.scrollHeight) {
+                alert("clear");
+                clearInterval(this);
+            }
+
+            //deshalb einfach ans Ende scrollen:
+            rvWert.scrollTo(0, rvWert.scrollHeight); //wirkt nicht zusammen mit xy: , "smooth");
+
+        }
+
+        function SetzeLimitIntern(Limit) {
+            try {
+
+                sReq = "http://nnn.nnn.nnn.nnn/soda/setlimits/" + Limit;
+
+                
+                fetch(sReq)
+                    .then(response => {
+                        if (response.ok) {
+                            return response.json(); // Parse the response data as JSON
+                        } else {
+                            throw new Error('Fehler in fetch(' + sReq + ')');
+                        }
+                    })
+                    .then(data => {
+                        if (data.rv != "okok") {
+                            console.error(data.text);
+                            errTitle = document.getElementById('RvText');
+                            errTitle.innerText = "Fehler:";
+                            errTitle.style.color = 'red';
+                            errText = document.getElementById('RvWert');
+                            errText.innerHTML = data.text;
+                            errText.style.color = 'red';
+                        }
+                        else {
+                            rvWert = document.getElementById('RvWert');
+                            rvWert.value = data.text;
+                            var myTimer = setInterval(Scroll(), 500);
+                        }
+                    })
+                    .catch(error => {
+                        console.error(error);
+                        errTitle = document.getElementById('RvText');
+                        errTitle.innerText = "Ausnahme:";
+                        errTitle.style.color = 'red';
+                        errText = document.getElementById('RvWert');
+                        errText.innerHTML = error;
+                        errText.style.color = 'red';
+                    });
+
+            }
+            catch (e2) {
+                console.error(e2);
+                document.getElementById('RvText').innerText = "Ausnahme2:";
+                document.getElementById('RvWert').innerHTML = e2;
+            }
+        }
+
+        function SetzeLimit(Limit) {
+            try {
+                //fkt nicht: document.body.style.cursor = 'progress';
+                //fkt. leider nur beim ersten Mal: 
+                document.getElementById('RvWert').innerHTML = "Warte...";
+                
+                SetzeLimitIntern(Limit)
+                //fkt nicht: document.body.style.cursor = "default";
+            }
+            catch (e) {
+                console.error(e);
+                document.getElementById('RvText').innerText = "Ausnahme3:";
+                document.getElementById('RvWert').innerHTML = e;
+            }
+        }
+
+        function Text2ClipBoard() {
+            var copyText = document.getElementById("RvWert");
+            copyText.select();
+            //nötig für Mobiltelefone? copyText.setSelectionRange(0, 99999); 
+
+            //Juni 2024:writeText funktioniert nicht, execCommand ist deprecated, aber alternativlos
+            //navigator.clipboard.writeText(copyText.value);
+            document.execCommand("copy");
+
+            //keine Möglichkeit gefunden, die Selektion wieder zu löschen
+            btn = document.getElementById("btnProgn");
+            btn.focus();
+            //copyText.focus();
+        }
+
+        function DeleteSel() {
+            var copyText = document.getElementById("RvWert");
+
+            copyText.select();
+            document.execCommand("delete");
+        }
+
+    </script>
+
+
+</head>
+
+
+<body>
+    <div id="title_bk">
+		<div id="title">Limits für die Hoymiles-Inverter setzen
+		</div>
+	</div>
+
+    <table>
+        <tr height="20">
+            <td valign="top" width="20"></td>
+            <td valign="top"></td>
+            <td valign="top"></td>
+            <td valign="top"></td>
+        </tr>
+
+        <tr>
+            <td valign="top"></td>
+            <td valign="top" width="100">Limit:</td>
+            <td valign="top">
+                <input name="limit" id="limit" value={{ limit }} maxlength="10" style="width: 100px;" />
+                <button id="btnLimit" onclick="SetzeLimit(sGetPara('limit'))">Setze Inverter-Limits</button>
+            </td>
+            <td valign="top">
+            </td>
+        </tr>
+
+
+        <tr height="10">
+            <td valign="top" width="20"></td>
+            <td valign="top"></td>
+            <td valign="top"></td>
+            <td valign="top"></td>
+        </tr>
+
+        <tr>
+            <td valign="top"></td>
+            <td valign="top"></td>
+            <td valign="top">
+                <button id="btnLimit" onclick="SetzeLimit(400)">400 W</button>
+                <button id="btnLimit" onclick="SetzeLimit(600)">600 W</button>
+                <button id="btnLimit" onclick="SetzeLimit(800)">800 W</button>
+                <button id="btnLimit" onclick="SetzeLimit(1000)">1000 W</button>
+                <button id="btnLimit" onclick="SetzeLimit(1400)">1400 W</button>
+            </td>
+            <td valign="top"></td>
+        </tr>
+
+        <tr>
+            <td valign="top"></td>
+            <td valign="top">
+                <div id="RvText"></div>
+            </td>
+            <td valign="top">
+                <textarea name="RvWert" id="RvWert" type="text" rows="40" cols="50"></textarea>
+            </td>
+            <td valign="top">
+                <button id="btnCopy" onclick="Text2ClipBoard()">
+                    <img src="{% static 'soda/copy_icon.jpg' %}" />
+                </button>
+                <br />
+                <button id="btnDelete" onclick="DeleteSel()">
+                    <img src="{% static 'soda/del_icon.jpg' %}" />
+                </button>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
